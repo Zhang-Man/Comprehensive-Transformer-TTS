@@ -1,11 +1,11 @@
 block_type: "transformer_fs2" # ["transformer_fs2", "transformer", "fastformer", "lstransformer", "conformer", "reformer"]
 
 duration_modeling:
-  learn_alignment: True
+  learn_alignment: False
   aligner_temperature: 0.0005
 
 prosody_modeling:
-  model_type: "none" # ["none", "du2021", "liu2021"]
+  model_type: "du2021" # ["none", "du2021", "liu2021"]
 
   # Du et al., 2021
   # This is only supported under supervised duration modeling (learn_alignment: False)
