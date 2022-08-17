@@ -189,6 +189,7 @@ if __name__ == "__main__":
         device = torch.device('cpu')
     print("Device of CompTransTTS:", device)
 
+    print("get local model in ckpts")
     # Get model
     model = get_model(args, configs, device, train=False)
 
@@ -220,7 +221,9 @@ if __name__ == "__main__":
         )) if load_spker_embed else None
 
         if preprocess_config["preprocessing"]["text"]["language"] == "en":
+            print("preprocess_english\n")
             texts = np.array([preprocess_english(args.text, preprocess_config)])
+            print("texts is :",texts)
         elif preprocess_config["preprocessing"]["text"]["language"] == "zh":
             texts = np.array([preprocess_mandarin(args.text, preprocess_config)])
         text_lens = np.array([len(texts[0])])
