@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-
+import numpy as np
 from utils.tools import get_variance_level, ssim
 from text import sil_phonemes_ids
 
@@ -64,6 +64,16 @@ class CompTransTTSLoss(nn.Module):
 
         return prob
 
+    def gaussian_Exponential_family_probability(sigma, mu, target, mask=None):
+        target = target.unsqueeze(2).expand_as(sigma)
+        eta = mu ** 2 / sigma - 1 / 2 * (sigma ** 2)
+        A_eta = (mu ** 2) / 2 * (sigma ** 2) + 1 / 2 * torch.log(2 * math.pi * sigma * sigma)
+        temp = torch.matmul(eta, target)
+        prob = torch.sum(torch.exp(temp - A_eta), dim=3)
+        if mask is not None:
+            prob = prob.masked_fill(mask.unsqueeze(-1).unsqueeze(-1), 0)
+        return prob
+
     def mdn_loss(self, w, sigma, mu, target, mask=None):
         """
         w -- [B, src_len, num_gaussians]
@@ -72,7 +82,7 @@ class CompTransTTSLoss(nn.Module):
         target -- [B, src_len, out_features]
         mask -- [B, src_len]
         """
-        prob = torch.log(w) + self.log_gaussian_probability(sigma, mu, target, mask)
+        prob = torch.log(w) + self.gaussian_Exponential_family_probability(sigma, mu, target, mask)
         nll = -torch.logsumexp(prob, 2)
         if mask is not None:
             nll = nll.masked_fill(mask, 0)
